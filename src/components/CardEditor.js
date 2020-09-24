@@ -36,7 +36,7 @@ class CardEditor extends Component {
 
     // TODO: Define your state properties here
     this.state = {
-      text: props.initialValue,
+      isLabelEditOpen: false,
     };
   }
 
@@ -64,7 +64,30 @@ class CardEditor extends Component {
           </div>
           <ul className="editor-actions">
             {/* render editor actions */}
-
+            <li className="editor-action">
+              <Button
+                text="Edit Labels"
+                icon={<EditIcon />}
+                variant="editor"
+                onClick={() => this.setState({ isLabelEditOpen: true })}
+              />
+            </li>
+            <li className="editor-action">
+              <Button
+                text="Copy"
+                icon={<CopyIcon />}
+                variant="editor"
+                onClick={this.props.onCopyCard}
+              />
+            </li>
+            <li className="editor-action">
+              <Button
+                text="Archive"
+                icon={<ArchiveIcon />}
+                variant="editor"
+                onClick={this.props.onArchiveCard}
+              />
+            </li>
             {/* render tags editing form */}
           </ul>
         </div>

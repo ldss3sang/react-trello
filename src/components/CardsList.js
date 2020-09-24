@@ -87,8 +87,10 @@ class CardsList extends Component {
   // - Call the `this.props.onAddCard` function to add a new card
   // - Use the `this.setState` method to update the state in order to close the card creation form
   handleAddNewCard(cardText = "") {
-    this.props.onAddCard(this.props.id, cardText);
-    this.setState({ creatingNewCard: false });
+    if (cardText) {
+      this.props.onAddCard(this.props.id, cardText);
+    }
+    this.handleCancelNewCard();
   }
 
   // TODO: implement the handleCancelNewCard method.
@@ -119,19 +121,31 @@ class CardsList extends Component {
   // TODO: implement the handleCancelEdit method.
   // Tips:
   // - Use the `this.setState` method to reset and close the editing form
-  handleCancelEdit() {}
+  handleCancelEdit() {
+    this.setState({
+      editCardId: null,
+      editCardText: "",
+      editCardTags: [],
+    });
+  }
 
   // TODO: implement the handleCopyCard method.
   // Tips:
   // - Call the `this.props.onCopyCard` function to clone a card
   // - Do not forget to reset and close the editing form
-  handleCopyCard() {}
+  handleCopyCard() {
+    this.props.onCopyCard(this.props.id, this.state.editCardId);
+    this.handleCancelEdit();
+  }
 
   // TODO: implement the handleArchiveCard method.
   // Tips:
   // - Call the `this.props.onRemoveCard` function to remove a card form the list
   // - Do not forget to reset and close the editing form
-  handleArchiveCard() {}
+  handleArchiveCard() {
+    this.props.onRemoveCard(this.props.id, this.state.editCardId);
+    this.handleCancelEdit();
+  }
 
   // TODO: implement the handleSaveCard method.
   // Tips:
@@ -139,11 +153,7 @@ class CardsList extends Component {
   // - Do not forget to reset and close the editing form
   handleSaveCard(text) {
     this.props.onEditCard(this.state.editCardId, text);
-    this.setState({
-      editCardId: null,
-      editCardText: "",
-      editCardTags: [],
-    });
+    this.handleCancelEdit();
   }
 
   // TODO: implement the handleRemoveTag method.

@@ -17,6 +17,7 @@ import PropTypes from "prop-types";
  */
 const Button = (props) => (
   <button className={`btn btn-${props.variant}`} onClick={props.onClick}>
+    {props.icon ?? null}
     <span>{props.text}</span>
   </button>
 );

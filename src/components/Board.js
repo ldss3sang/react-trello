@@ -31,11 +31,11 @@ class Board extends Component {
     this.handleAddCard = this.handleAddCard.bind(this); // done
     this.handleRemoveCard = this.handleRemoveCard.bind(this); // done
     this.handleRemoveAllCards = this.handleRemoveAllCards.bind(this); // done
-    this.handleCopyCard = this.handleCopyCard.bind(this);
+    this.handleCopyCard = this.handleCopyCard.bind(this); // done
     this.handleCopyList = this.handleCopyList.bind(this); // done
     this.handleMoveAllCards = this.handleMoveAllCards.bind(this); // done
     this.handleToggleMenu = this.handleToggleMenu.bind(this); // done
-    this.handleEditCard = this.handleEditCard.bind(this);
+    this.handleEditCard = this.handleEditCard.bind(this); // done
     this.handleRemoveTag = this.handleRemoveTag.bind(this);
     this.handleAddTag = this.handleAddTag.bind(this);
     this.renderLists = this.renderLists.bind(this); // done
@@ -163,7 +163,23 @@ class Board extends Component {
   // - Use the `_getNextNumber` function to get the new card number
   // - Add it to the list
   // - Use the `this.setState` method to update the state (lists, cards)
-  handleCopyCard(listId, cardId) {}
+  handleCopyCard(listId, cardId) {
+    const { lists, cards } = this.state;
+    const id = _generateId();
+    const number = _getNextNumber(cards);
+    cards[id] = {
+      id,
+      number,
+      description: cards[cardId].description,
+      tags: cards[cardId].tags,
+    };
+    lists[listId].cardIds.push(id);
+
+    this.setState({
+      lists,
+      cards,
+    });
+  }
 
   // TODO: implement the handleCopyList method to clone an entire list.
   // Tips:
@@ -283,7 +299,7 @@ class Board extends Component {
     return (
       <div className="board-lists">
         {/* render the lists */}
-        {listOrder.map((listId, index) => {
+        {listOrder.map((listId) => {
           const orderCards = lists[listId].cardIds.map(
             (cardId) => cards[cardId]
           );
