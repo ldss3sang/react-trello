@@ -1,8 +1,8 @@
-import React from 'react';
-import PropTypes from 'prop-types';
+import React from "react";
+import PropTypes from "prop-types";
 // Components
-import { Draggable } from 'react-beautiful-dnd';
-import Tag from './Tag';
+import { Draggable } from "react-beautiful-dnd";
+import Tag from "./Tag";
 
 /*
  * TODO: Create the Card component
@@ -13,7 +13,7 @@ import Tag from './Tag';
  * - Should render a <div> element as the container for the card content
  * - Should render the tags list at the top of the card content
  * - Should render the card number and description below the tags
- * 
+ *
  * Tips:
  * - You can use the 'card' CSS class for styling
  *
@@ -27,8 +27,14 @@ import Tag from './Tag';
  */
 const Card = (props) => (
   <div className="card">
-    { /* render tags list */ }
-    { /* render card number and description */ }
+    {/* render tags list */}
+    <div style={{ marginBottom: "5px" }}>
+      {props.tags.map((tag, index) => (
+        <Tag key={index} text={tag} />
+      ))}
+    </div>
+    {/* render card number and description */}
+    <p style={{ margin: "0px" }}>{`#${props.number} ${props.description}`}</p>
   </div>
 );
 
@@ -37,7 +43,7 @@ Card.propTypes = {
   index: PropTypes.number.isRequired,
   number: PropTypes.number.isRequired,
   description: PropTypes.string,
-  tags: PropTypes.arrayOf(PropTypes.string)
+  tags: PropTypes.arrayOf(PropTypes.string),
 };
 
 export default Card;

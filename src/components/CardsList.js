@@ -1,13 +1,13 @@
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
+import React, { Component } from "react";
+import PropTypes from "prop-types";
 // Icons
-import { IoMdAdd as AddIcon } from 'react-icons/io';
+import { IoMdAdd as AddIcon } from "react-icons/io";
 // Components
-import { Droppable, Draggable } from 'react-beautiful-dnd';
-import Card from './Card';
-import CardEditor from './CardEditor';
-import Menu from './Menu';
-import Form from './Form';
+import { Droppable, Draggable } from "react-beautiful-dnd";
+import Card from "./Card";
+import CardEditor from "./CardEditor";
+import Menu from "./Menu";
+import Form from "./Form";
 
 /*
  * TODO: Create the CardsList component
@@ -18,67 +18,85 @@ import Form from './Form';
  * - Should render a <div> element as the container for the card
  * - Should render the tags list at the top of the card content
  * - Should render the card number and description below the tags
- * 
+ *
  * Tips:
  * - You can use the 'card' CSS class for styling
- * 
- */ 
+ *
+ */
 class CardsList extends Component {
   constructor(props) {
     super(props);
 
     // CardsList state
-    this.state = { 
+    this.state = {
       creatingNewCard: false,
       editCardId: null,
-      editCardText: '',
-      editCardTags: []
+      editCardText: "",
+      editCardTags: [],
     };
 
     // TODO: Define all the card actions here
     this.actions = [
       [
-        { 
-          title: 'Add Card...',
-          onClick: () => null // TODO
-        },
-        { 
-          title: 'Copy List...',
-          onClick: () => null // TODO
-        }
-      ],
-      [
         {
-          title: 'Move All Cards in This List...',
-          onClick: () => null // TODO
+          title: "Add Card...",
+          onClick: () => {
+            this.props.onToggleMenu(this.props.id);
+            this.setState({ creatingNewCard: true });
+          }, // TODO // done
         },
         {
-          title: 'Archive All Cards in This List...',
-          onClick: () => null // TODO
+          title: "Copy List...",
+          onClick: () => this.props.onCopyList(this.props.id), // TODO //done
         },
       ],
       [
         {
-          title: 'Archive This List',
-          onClick: () => null // TODO
-        }
-      ]
+          title: "Move All Cards in This List...",
+          onClick: () => this.props.onMoveAllCards(this.props.id), // TODO // done
+        },
+        {
+          title: "Archive All Cards in This List...",
+          onClick: () => this.props.onRemoveAllCards(this.props.id), // TODO // done
+        },
+      ],
+      [
+        {
+          title: "Archive This List",
+          onClick: () => this.props.onRemoveList(this.props.id), // TODO // done
+        },
+      ],
     ];
 
     // TODO: Bind your class methods here
     // ...
+    this.handleAddNewCard = this.handleAddNewCard.bind(this); // done
+    this.handleCancelNewCard = this.handleCancelNewCard.bind(this); // done
+    this.handleCreateNewCard = this.handleCreateNewCard.bind(this); // done
+    this.handleEditCard = this.handleEditCard.bind(this);
+    this.handleCancelEdit = this.handleCancelEdit.bind(this);
+    this.handleCopyCard = this.handleCopyCard.bind(this);
+    this.handleSaveCard = this.handleSaveCard.bind(this);
+    this.handleArchiveCard = this.handleArchiveCard.bind(this);
+    this.handleRemoveTag = this.handleRemoveTag.bind(this);
+    this.handleAddTag = this.handleAddTag.bind(this);
   }
 
   // TODO: implement the handleAddNewCard method to add a new card to the list.
   // Tips:
   // - Call the `this.props.onAddCard` function to add a new card
   // - Use the `this.setState` method to update the state in order to close the card creation form
-  handleAddNewCard(cardText = '') {}
+  handleAddNewCard(cardText = "") {
+    this.props.onAddCard(this.props.id, cardText);
+    this.setState({ creatingNewCard: false });
+  }
 
   // TODO: implement the handleCancelNewCard method.
   // Tips:
   // - Use the `this.setState` method to update the state in order to close the card creation form
-  handleCancelNewCard() {}
+  handleCancelNewCard() {
+    this.setState({ creatingNewCard: false });
+  }
 
   // TODO: implement the handleCreateNewCard method.
   // Tips:
@@ -90,7 +108,13 @@ class CardsList extends Component {
   // TODO: implement the handleEditCard method.
   // Tips:
   // - Use the `this.setState` method to update the text and tags values of the editing from
-  handleEditCard(id, text, tags) {}
+  handleEditCard(id, text, tags) {
+    this.setState({
+      editCardId: id,
+      editCardText: text,
+      editCardTags: tags,
+    });
+  }
 
   // TODO: implement the handleCancelEdit method.
   // Tips:
@@ -113,7 +137,14 @@ class CardsList extends Component {
   // Tips:
   // - Call the `this.props.onEditCard` function to save changes on the card
   // - Do not forget to reset and close the editing form
-  handleSaveCard(text) {}
+  handleSaveCard(text) {
+    this.props.onEditCard(this.state.editCardId, text);
+    this.setState({
+      editCardId: null,
+      editCardText: "",
+      editCardTags: [],
+    });
+  }
 
   // TODO: implement the handleRemoveTag method.
   // Tips:
@@ -135,13 +166,21 @@ class CardsList extends Component {
   // - Add a drag handle to the list header so that user can grab the list and drag it around
   // (using the dragHandleProps)
   renderHeader() {
+    const { id, title, cards } = this.props;
     return (
       <div className="cards-list-header">
         <div className="cards-list-title">
-          { /* render the list title */ }
-          { /* render the Menu component */ }
+          {/* render the list title */}
+          <h3>{title}</h3>
+          {/* render the Menu component */}
+          <Menu
+            isOpen={this.props.isMenuOpen}
+            onClick={() => this.props.onToggleMenu(this.props.id)}
+            actions={this.actions}
+          />
         </div>
-        { /* render the number of cards in this list */ }
+        {/* render the number of cards in this list */}
+        <p>{cards.length} cards</p>
       </div>
     );
   }
@@ -160,9 +199,24 @@ class CardsList extends Component {
   // --> https://github.com/atlassian/react-beautiful-dnd/blob/master/docs/api/droppable.md#children-function
   renderCards() {
     return (
-      <ol className="cards">
-        { /* render the cards */ }
-      </ol>
+      <div className="cards">
+        {
+          /* render the cards */
+          this.props.cards.map(({ id, number, description, tags }, index) => (
+            <li
+              key={id}
+              onClick={() => this.handleEditCard(id, description, tags)}
+            >
+              <Card
+                id={id}
+                number={number}
+                description={description}
+                tags={tags}
+              />
+            </li>
+          ))
+        }
+      </div>
     );
   }
 
@@ -170,7 +224,25 @@ class CardsList extends Component {
   // Tips:
   // - Should render either a Form component to create a new card
   // or a button to trigger the card creation mode (creatingNewCard)
-  renderFooter() {}
+  renderFooter() {
+    return this.state.creatingNewCard ? (
+      <Form
+        type="card"
+        placeholder="Enter a title for this card..."
+        buttonText="Add Card"
+        onClickSubmit={this.handleAddNewCard}
+        onClickCancel={this.handleCancelNewCard}
+      />
+    ) : (
+      <button
+        className="add-button add-card-button"
+        onClick={this.handleCreateNewCard}
+      >
+        <AddIcon />
+        <p>Add a new card</p>
+      </button>
+    );
+  }
 
   // TODO: render the CardsList UI.
   //
@@ -184,14 +256,28 @@ class CardsList extends Component {
   render() {
     return (
       <div className="cards-list">
-        { /* render list header */ }
-        { /* render cards */ }
-        { /* render list footer */ }
-        { /* render card editor */ }
+        {/* render list header */}
+        {this.renderHeader()}
+        {/* render cards */}
+        {this.renderCards()}
+        {/* render list footer */}
+        {this.renderFooter()}
+        {/* render card editor */}
+        {this.state.editCardId && (
+          <CardEditor
+            initialValue={this.state.editCardText}
+            tags={this.state.editCardTags}
+            onSaveCard={this.handleSaveCard}
+            onRemoveTag={this.handleRemoveTag}
+            onAddTag={this.handleAddTag}
+            onCopyCard={this.handleCopyCard}
+            onArchiveCard={this.handleArchiveCard}
+          />
+        )}
       </div>
     );
   }
-};
+}
 
 CardsList.defaultProps = {
   cards: null,
@@ -206,7 +292,7 @@ CardsList.defaultProps = {
   onCopyCard: () => null,
   onEditCard: () => null,
   onRemoveTag: () => null,
-  onAddTag: () => null
+  onAddTag: () => null,
 };
 
 CardsList.propTypes = {
@@ -218,7 +304,7 @@ CardsList.propTypes = {
       id: PropTypes.string.isRequired,
       number: PropTypes.number.isRequired,
       description: PropTypes.string,
-      tags: PropTypes.arrayOf(PropTypes.string)
+      tags: PropTypes.arrayOf(PropTypes.string),
     })
   ),
   isMenuOpen: PropTypes.bool,
@@ -232,7 +318,7 @@ CardsList.propTypes = {
   onCopyCard: PropTypes.func,
   onEditCard: PropTypes.func,
   onRemoveTag: PropTypes.func,
-  onAddTag: PropTypes.func
+  onAddTag: PropTypes.func,
 };
 
 export default CardsList;
