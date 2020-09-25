@@ -11,7 +11,6 @@ import {
 import Button from "./Button";
 import Form from "./Form";
 import Popover from "./Popover";
-import Tag from "./Tag";
 
 /*
  * TODO: Create the CardEditor component
@@ -34,17 +33,36 @@ class CardEditor extends Component {
   constructor(props) {
     super(props);
 
+    this.editorRef = React.createRef();
+
     // TODO: Define your state properties here
     this.state = {
       isLabelEditOpen: false,
+      closeOnlyLabel: false,
     };
+
+    this.handleOutsideClick = this.handleOutsideClick.bind(this);
+  }
+
+  handleOutsideClick(event) {
+    if (this.editorRef.current.contains(event.target)) {
+      return;
+    }
+    if (!this.state.closeOnlyLabel) {
+      this.props.onClickOutside();
+    } else {
+      this.setState({
+        closeOnlyLabel: false,
+      });
+    }
   }
 
   // TODO: render the CardEditor UI.
   render() {
     return (
-      <div className="editor-modal">
+      <div className="editor-modal" onClick={this.handleOutsideClick}>
         <div
+          ref={this.editorRef}
           style={{
             display: "flex",
             flexDirection: "row",
@@ -89,6 +107,40 @@ class CardEditor extends Component {
               />
             </li>
             {/* render tags editing form */}
+            {this.state.isLabelEditOpen && (
+              <Popover
+                title="Labels"
+                onClickOutside={() =>
+                  this.setState({
+                    isLabelEditOpen: false,
+                    closeOnlyLabel: true,
+                  })
+                }
+                offset={{ top: -119 }}
+              >
+                <div>
+                  <ul className="labels">
+                    {this.props.tags.map((tag, index) => (
+                      <li
+                        key={index}
+                        className="label"
+                        onClick={() => this.props.onRemoveTag(index)}
+                      >
+                        <RemoveIcon />
+                        <p>{tag}</p>
+                      </li>
+                    ))}
+                  </ul>
+                  <h4 className="new-label-title">Add a new label</h4>
+                  <Form
+                    type="labels"
+                    placeholder="Enter a name for this label..."
+                    buttonText="Add"
+                    onClickSubmit={this.props.onAddTag}
+                  />
+                </div>
+              </Popover>
+            )}
           </ul>
         </div>
       </div>
@@ -105,6 +157,7 @@ CardEditor.defaultProps = {
   onAddTag: () => null,
   onCopyCard: () => null,
   onArchiveCard: () => null,
+  onClickOutside: () => null,
 };
 
 CardEditor.propTypes = {
@@ -119,6 +172,7 @@ CardEditor.propTypes = {
   onAddTag: PropTypes.func,
   onCopyCard: PropTypes.func,
   onArchiveCard: PropTypes.func,
+  onClickOutside: PropTypes.func,
 };
 
 export default CardEditor;

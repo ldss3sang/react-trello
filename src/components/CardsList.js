@@ -35,6 +35,8 @@ class CardsList extends Component {
       editCardTags: [],
     };
 
+    this.cardRefs = {};
+
     // TODO: Define all the card actions here
     this.actions = [
       [
@@ -159,12 +161,18 @@ class CardsList extends Component {
   // TODO: implement the handleRemoveTag method.
   // Tips:
   // - Call the `this.props.onRemoveTag` function to remove a tag from a card
-  handleRemoveTag(tagId) {}
+  handleRemoveTag(tagId) {
+    this.props.onRemoveTag(this.state.editCardId, tagId);
+  }
 
   // TODO: implement the handleAddTag method.
   // Tips:
   // - Call the `this.props.onAddTag` function to add a tag to a card
-  handleAddTag(text) {}
+  handleAddTag(text) {
+    if (text) {
+      this.props.onAddTag(this.state.editCardId, text);
+    }
+  }
 
   // TODO: implement the renderHeader method to render the list header UI.
   // Tips:
@@ -176,7 +184,7 @@ class CardsList extends Component {
   // - Add a drag handle to the list header so that user can grab the list and drag it around
   // (using the dragHandleProps)
   renderHeader() {
-    const { id, title, cards } = this.props;
+    const { title, cards } = this.props;
     return (
       <div className="cards-list-header">
         <div className="cards-list-title">
@@ -216,6 +224,11 @@ class CardsList extends Component {
             <li
               key={id}
               onClick={() => this.handleEditCard(id, description, tags)}
+              ref={(node) => {
+                if (node) {
+                  this.cardRefs[id] = node;
+                }
+              }}
             >
               <Card
                 id={id}
@@ -277,11 +290,18 @@ class CardsList extends Component {
           <CardEditor
             initialValue={this.state.editCardText}
             tags={this.state.editCardTags}
+            position={{
+              top: this.cardRefs[this.state.editCardId].getBoundingClientRect()
+                .top,
+              left: this.cardRefs[this.state.editCardId].getBoundingClientRect()
+                .left,
+            }}
             onSaveCard={this.handleSaveCard}
             onRemoveTag={this.handleRemoveTag}
             onAddTag={this.handleAddTag}
             onCopyCard={this.handleCopyCard}
             onArchiveCard={this.handleArchiveCard}
+            onClickOutside={() => this.handleCancelEdit()}
           />
         )}
       </div>

@@ -87,7 +87,7 @@ class Form extends Component {
     return (
       <form ref={this.formRef} className={`form form-${this.props.type}`}>
         {/* render form control: input or textarea */}
-        {this.props.type === "list" ? (
+        {this.props.type === "list" || this.props.type === "labels" ? (
           <input
             type="text"
             value={this.state.text}
@@ -135,7 +135,7 @@ Form.defaultProps = {
 };
 
 Form.propTypes = {
-  type: PropTypes.oneOf(["list", "card", "editor"]).isRequired,
+  type: PropTypes.oneOf(["list", "card", "editor", "labels"]).isRequired,
   initialValue: PropTypes.string,
   placeholder: PropTypes.string,
   buttonText: PropTypes.string,

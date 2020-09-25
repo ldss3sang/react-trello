@@ -8,7 +8,6 @@ import CardsList from "./CardsList";
 import Form from "./Form";
 
 import data from "../data";
-import Card from "./Card";
 
 class Board extends Component {
   constructor(props) {
@@ -265,12 +264,20 @@ class Board extends Component {
   // TODO: implement the handleRemoveTag method to remove a tag from a card.
   // Tips:
   // - Use the `this.setState` method to update the state (cards)
-  handleRemoveTag(cardId, tagId) {}
+  handleRemoveTag(cardId, tagId) {
+    const { cards } = this.state;
+    cards[cardId].tags.splice(tagId, 1);
+    this.setState({ cards });
+  }
 
   // TODO: implement the handleAddTag method to add a tag to a card.
   // Tips:
   // - Use the `this.setState` method to update the state (cards)
-  handleAddTag(cardId, text = "") {}
+  handleAddTag(cardId, text = "") {
+    const { cards } = this.state;
+    cards[cardId].tags.push(text);
+    this.setState({ cards });
+  }
 
   // [BONUS]: implement the handleDragEnd method to persist list and card reordering
   // Tips:
