@@ -183,10 +183,10 @@ class CardsList extends Component {
   // [BONUS]:
   // - Add a drag handle to the list header so that user can grab the list and drag it around
   // (using the dragHandleProps)
-  renderHeader() {
+  renderHeader(provided) {
     const { title, cards } = this.props;
     return (
-      <div className="cards-list-header">
+      <div className="cards-list-header" {...provided.dragHandleProps}>
         <div className="cards-list-title">
           {/* render the list title */}
           <h3>{title}</h3>
@@ -217,29 +217,41 @@ class CardsList extends Component {
   // --> https://github.com/atlassian/react-beautiful-dnd/blob/master/docs/api/droppable.md#children-function
   renderCards() {
     return (
-      <div className="cards">
-        {
-          /* render the cards */
-          this.props.cards.map(({ id, number, description, tags }, index) => (
-            <li
-              key={id}
-              onClick={() => this.handleEditCard(id, description, tags)}
-              ref={(node) => {
-                if (node) {
-                  this.cardRefs[id] = node;
-                }
-              }}
-            >
-              <Card
-                id={id}
-                number={number}
-                description={description}
-                tags={tags}
-              />
-            </li>
-          ))
-        }
-      </div>
+      <Droppable droppableId={this.props.id} type="card" direction="vertical">
+        {(provided) => (
+          <ul
+            className="cards"
+            ref={provided.innerRef}
+            {...provided.droppableProps}
+          >
+            {
+              /* render the cards */
+              this.props.cards.map(
+                ({ id, number, description, tags }, index) => (
+                  <li
+                    key={id}
+                    onClick={() => this.handleEditCard(id, description, tags)}
+                    ref={(node) => {
+                      if (node) {
+                        this.cardRefs[id] = node;
+                      }
+                    }}
+                  >
+                    <Card
+                      id={id}
+                      index={index}
+                      number={number}
+                      description={description}
+                      tags={tags}
+                    />
+                  </li>
+                )
+              )
+            }
+            {provided.placeholder}
+          </ul>
+        )}
+      </Droppable>
     );
   }
 
@@ -278,33 +290,43 @@ class CardsList extends Component {
   // --> https://github.com/atlassian/react-beautiful-dnd/blob/master/docs/api/draggable.md#children-function-render-props--function-as-child
   render() {
     return (
-      <div className="cards-list">
-        {/* render list header */}
-        {this.renderHeader()}
-        {/* render cards */}
-        {this.renderCards()}
-        {/* render list footer */}
-        {this.renderFooter()}
-        {/* render card editor */}
-        {this.state.editCardId && (
-          <CardEditor
-            initialValue={this.state.editCardText}
-            tags={this.state.editCardTags}
-            position={{
-              top: this.cardRefs[this.state.editCardId].getBoundingClientRect()
-                .top,
-              left: this.cardRefs[this.state.editCardId].getBoundingClientRect()
-                .left,
-            }}
-            onSaveCard={this.handleSaveCard}
-            onRemoveTag={this.handleRemoveTag}
-            onAddTag={this.handleAddTag}
-            onCopyCard={this.handleCopyCard}
-            onArchiveCard={this.handleArchiveCard}
-            onClickOutside={() => this.handleCancelEdit()}
-          />
+      <Draggable draggableId={this.props.id} index={this.props.index}>
+        {(provided) => (
+          <div
+            className="cards-list"
+            ref={provided.innerRef}
+            {...provided.draggableProps}
+          >
+            {/* render list header */}
+            {this.renderHeader(provided)}
+            {/* render cards */}
+            {this.renderCards()}
+            {/* render list footer */}
+            {this.renderFooter()}
+            {/* render card editor */}
+            {this.state.editCardId && (
+              <CardEditor
+                initialValue={this.state.editCardText}
+                tags={this.state.editCardTags}
+                position={{
+                  top: this.cardRefs[
+                    this.state.editCardId
+                  ].getBoundingClientRect().top,
+                  left: this.cardRefs[
+                    this.state.editCardId
+                  ].getBoundingClientRect().left,
+                }}
+                onSaveCard={this.handleSaveCard}
+                onRemoveTag={this.handleRemoveTag}
+                onAddTag={this.handleAddTag}
+                onCopyCard={this.handleCopyCard}
+                onArchiveCard={this.handleArchiveCard}
+                onClickOutside={() => this.handleCancelEdit()}
+              />
+            )}
+          </div>
         )}
-      </div>
+      </Draggable>
     );
   }
 }

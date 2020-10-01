@@ -35,8 +35,9 @@ class Board extends Component {
     this.handleMoveAllCards = this.handleMoveAllCards.bind(this); // done
     this.handleToggleMenu = this.handleToggleMenu.bind(this); // done
     this.handleEditCard = this.handleEditCard.bind(this); // done
-    this.handleRemoveTag = this.handleRemoveTag.bind(this);
-    this.handleAddTag = this.handleAddTag.bind(this);
+    this.handleRemoveTag = this.handleRemoveTag.bind(this); // done
+    this.handleAddTag = this.handleAddTag.bind(this); // done
+    this.handleDragEnd = this.handleDragEnd.bind(this);
     this.renderLists = this.renderLists.bind(this); // done
   }
 
@@ -286,7 +287,35 @@ class Board extends Component {
   // - Handle both type of draggable (list and card) by checking the value of type
   // - Re-order cards inside the list if type equals 'card'. Use the `this.setState` method to update the state (lists)
   // - Re-order lists inside the board if type equals 'list'. Use the `this.setState` method to update the state (listOrder)
-  handleDragEnd({ destination, source, draggableId, type }) {}
+  handleDragEnd({ destination, source, draggableId, type }) {
+    if (!destination) {
+      return;
+    }
+
+    if (
+      source.droppableId === destination.droppableId &&
+      source.index === destination.index
+    ) {
+      return;
+    }
+
+    if (type === "list") {
+      const { listOrder } = this.state;
+      listOrder.splice(source.index, 1);
+      listOrder.splice(destination.index, 0, draggableId);
+      this.setState({ listOrder });
+    } else if (type === "card") {
+      const { lists } = this.state;
+      lists[source.droppableId].cardIds.splice(source.index, 1);
+      lists[destination.droppableId].cardIds.splice(
+        destination.index,
+        0,
+        draggableId
+      );
+
+      this.setState({ lists });
+    }
+  }
 
   // TODO: implement the renderLists method to render the board lists UI.
   // Tips:
@@ -304,35 +333,49 @@ class Board extends Component {
   renderLists() {
     const { listOrder, lists, cards } = this.state;
     return (
-      <div className="board-lists">
-        {/* render the lists */}
-        {listOrder.map((listId) => {
-          const orderCards = lists[listId].cardIds.map(
-            (cardId) => cards[cardId]
-          );
-          return (
-            <li key={listId}>
-              <CardsList
-                id={listId}
-                title={lists[listId].title}
-                cards={orderCards}
-                isMenuOpen={this.state.openMenuId === listId}
-                onToggleMenu={this.handleToggleMenu}
-                onAddCard={this.handleAddCard}
-                onRemoveCard={this.handleRemoveCard}
-                onRemoveList={this.handleRemoveList}
-                onRemoveAllCards={this.handleRemoveAllCards}
-                onCopyList={this.handleCopyList}
-                onMoveAllCards={this.handleMoveAllCards}
-                onCopyCard={this.handleCopyCard}
-                onEditCard={this.handleEditCard}
-                onRemoveTag={this.handleRemoveTag}
-                onAddTag={this.handleAddTag}
-              />
-            </li>
-          );
-        })}
-      </div>
+      <Droppable
+        droppableId="droppable-lists"
+        direction="horizontal"
+        type="list"
+      >
+        {(provided) => (
+          <ul
+            className="board-lists"
+            ref={provided.innerRef}
+            {...provided.droppableProps}
+          >
+            {/* render the lists */}
+            {listOrder.map((listId, index) => {
+              const orderCards = lists[listId].cardIds.map(
+                (cardId) => cards[cardId]
+              );
+              return (
+                <li key={listId}>
+                  <CardsList
+                    id={listId}
+                    index={index}
+                    title={lists[listId].title}
+                    cards={orderCards}
+                    isMenuOpen={this.state.openMenuId === listId}
+                    onToggleMenu={this.handleToggleMenu}
+                    onAddCard={this.handleAddCard}
+                    onRemoveCard={this.handleRemoveCard}
+                    onRemoveList={this.handleRemoveList}
+                    onRemoveAllCards={this.handleRemoveAllCards}
+                    onCopyList={this.handleCopyList}
+                    onMoveAllCards={this.handleMoveAllCards}
+                    onCopyCard={this.handleCopyCard}
+                    onEditCard={this.handleEditCard}
+                    onRemoveTag={this.handleRemoveTag}
+                    onAddTag={this.handleAddTag}
+                  />
+                </li>
+              );
+            })}
+            {provided.placeholder}
+          </ul>
+        )}
+      </Droppable>
     );
   }
 
@@ -369,12 +412,14 @@ class Board extends Component {
   // - Add the onDragEnd prop to the <DragDropContext> component
   render() {
     return (
-      <div className="board">
-        {/* render the lists */}
-        {this.renderLists()}
-        {/* render the list creation form */}
-        {this.renderNewList()}
-      </div>
+      <DragDropContext onDragEnd={this.handleDragEnd}>
+        <div className="board">
+          {/* render the lists */}
+          {this.renderLists()}
+          {/* render the list creation form */}
+          {this.renderNewList()}
+        </div>
+      </DragDropContext>
     );
   }
 }
