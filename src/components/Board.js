@@ -384,7 +384,6 @@ class Board extends Component {
   // - Render a Form component in creation mode to let the user enter the new list title
   // - Otherwise, render a button to trigger the creation mode (creatingNewList)
   renderNewList() {
-    console.log(this.state.creatingNewList);
     return this.state.creatingNewList ? (
       <Form
         type="list"
